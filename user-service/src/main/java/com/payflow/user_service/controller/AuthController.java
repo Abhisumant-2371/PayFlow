@@ -48,16 +48,15 @@ public class AuthController {
                 log.warn("Email is empty");
                 return ResponseEntity.badRequest().body("Email is empty");
         }
-        String email = signUpRequest.getEmail();
-        Optional<User> user= userService.getUserByEmail(email);
 
-        if(user.isPresent()){
-            log.warn("User with email {} already exists", email);
-            return ResponseEntity.badRequest().body("User with email already exists");
-        }
         User newUser = userUtil.getUserFromSignUpRequest(signUpRequest);
 
-        userService.saveUser(newUser);
+        User savedUser = userService.createUser(newUser);
+
+        if (savedUser == null) {
+            log.warn("User with email {} already exists", signUpRequest.getEmail());
+            return ResponseEntity.badRequest().body("User with email already exists");
+        }
 
         return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
     }
